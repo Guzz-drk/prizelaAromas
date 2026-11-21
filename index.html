@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prizela Aromas</title>
+  
+  <!-- Fonts -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@300;400;500;600;700&display=swap">
+  
+  <!-- Basecoat UI -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css">
+  
+  <!-- Shell System -->
+  <style>
+/* Skip artifact shell — fixed styles served beside every artifact.
+   Complements basecoat; artifacts override --accent for their own identity. */
+:root {
+  color-scheme: light dark;
+  --accent: #2563eb;
+  --accent-contrast: #ffffff;
+  --accent-text: color-mix(in srgb, var(--accent) 72%, #000);
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+  --text: #14171f;
+  --text-muted: #5b6472;
+  --border: rgba(20, 23, 31, 0.10);
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(20, 23, 31, 0.08);
+  --space: 16px;
+}
+/* Theme resolution. Without data-theme the viewer's system preference decides,
+   as it always did. With it, the artifact's own choice wins in BOTH directions:
+   a page that hardcodes one palette must not be handed the opposite set of
+   tokens by the machine it happens to be opened on. The dark values appear
+   twice because a media query cannot be folded into a selector list.
+   The attribute sits inside :where() so these blocks keep the specificity of a
+   bare :root — the page's own <style> is linked after this file and must go on
+   overriding any token it wants, exactly as it could before. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+    --bg: #101318;
+    --surface: #181c23;
+    --text: #eef1f6;
+    --text-muted: #9aa4b2;
+    --border: rgba(238, 241, 246, 0.12);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  }
+}
+:root:where([data-theme="dark"]) {
+  color-scheme: dark;
+  --accent-text: color-mix(in srgb, var(--accent) 78%, #fff);
+  --bg: #101318;
+  --surface: #181c23;
+  --text: #eef1f6;
+  --text-muted: #9aa4b2;
+  --border: rgba(238, 241, 246, 0.12);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+:root:where([data-theme="light"]) { color-scheme: light; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+
+.shell-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+.shell-section { padding: calc(var(--space) * 2) 0; }
+.shell-grid { display: grid; gap: var(--space); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.shell-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: var(--space); }
+.shell-footer { padding: 24px 0 40px; color: var(--text-muted); font-size: 13px; }
+
+.shell-hero { padding: calc(var(--space) * 3) 0 calc(var(--space) * 2); }
+.shell-hero h1 { font-size: clamp(26px, 4vw, 40px); line-height: 1.15; margin: 0 0 10px; text-wrap: balance; }
+.shell-hero p { color: var(--text-muted); max-width: 60ch; margin: 0; }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space);
+}
+
+.kpi { display: flex; flex-direction: column; gap: 4px; }
+.kpi .kpi-value { font-size: 28px; font-weight: 650; line-height: 1.1; }
+.kpi .kpi-label { font-size: 13px; color: var(--text-muted); }
+.kpi .kpi-delta { font-size: 12.5px; font-weight: 600; }
+.kpi .kpi-delta.up { color: #0a8f3c; }
+.kpi .kpi-delta.down { color: #cf3131; }
+
+table.shell-table { border-collapse: collapse; width: 100%; font-size: 14px; }
+table.shell-table th {
+  text-align: left; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--text-muted); font-weight: 600;
+}
+table.shell-table th, table.shell-table td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--border); }
+table.shell-table td.num, table.shell-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.shell-table tbody tr:hover { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+
+.chart-box { width: 100%; min-height: 220px; }
+.chart-box svg { width: 100%; height: auto; display: block; }
+
+.muted { color: var(--text-muted); }
+.accent { color: var(--accent-text); }
+.shell-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-text);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shell-fade { animation: shell-fade 400ms ease both; }
+  @keyframes shell-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}
+
+</style>
+  
+
+  <style>
+    :root {
+      --accent: #4a5c43; /* Verde Oliva elegante */
+      --terracotta: #8e4f3c; /* Terracota suave */
+      --terracotta-hover: #783f2e;
+      --sand-bg: #FAF7F2;
+      --surface-warm: #FFFFFF;
+      --surface-subtle: #F3ECE2;
+      --text-main: #2b2723;
+      --text-soft: #5e574f;
+      --border-warm: #E6DED2;
+      --radius-sm: 8px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --font-serif: 'Lora', Georgia, serif;
+      --font-sans: 'Montserrat', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: var(--sand-bg);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, .serif-font {
+      font-family: var(--font-serif);
+      color: var(--text-main);
+      letter-spacing: -0.015em;
+    }
+
+    /* Top Announcement Bar */
+    .announcement-bar {
+      background-color: #4a5c43;
+      color: #FFFFFF;
+      text-align: center;
+      padding: 9px 16px;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+    }
+
+    /* Navbar */
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 90;
+      background: rgba(250, 247, 242, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-warm);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+
+    .brand-logo {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+    }
+
+    .brand-logo .logo-title {
+      font-family: var(--font-serif);
+      font-size: 1.55rem;
+      font-weight: 600;
+      color: var(--text-main);
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+
+    .brand-logo .logo-sub {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      color: var(--terracotta);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--terracotta);
+    }
+
+    /* Custom Buttons */
+    .btn-olive {
+      background-color: var(--accent);
+      color: #FFFFFF;
+      padding: 13px 28px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.92rem;
+      letter-spacing: 0.03em;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(74, 92, 67, 0.22);
+      transition: all 0.25s ease;
+    }
+
+    .btn-olive:hover {
+      background-color: #3e4e38;
+      box-shadow: 0 6px 18px rgba(74, 92, 67, 0.32);
+      transform: translateY(-1px);
+      color: #FFFFFF;
+    }
+
+    .btn-terracotta {
+      background-color: var(--terracotta);
+      color: #FFFFFF;
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 3px 12px rgba(142, 79, 60, 0.2);
+      transition: all 0.2s ease;
+    }
+
+    .btn-terracotta:hover {
+      background-color: var(--terracotta-hover);
+      color: #FFFFFF;
+      transform: translateY(-1px);
+    }
+
+    .btn-outline-warm {
+      background: transparent;
+      border: 1px solid var(--border-warm);
+      color: var(--text-main);
+      padding: 11px 22px;
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline-warm:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background-color: #FFFFFF;
+    }
+
+    /* Hero Section */
+    .hero-wrap {
+      padding: 64px 0 72px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: center;
+      gap: 48px;
+    }
+
+    .hero-badge-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background-color: #ECE5D8;
+      border-radius: 40px;
+      color: var(--terracotta);
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-badge-tag svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .hero-title {
+      font-size: clamp(2.4rem, 4vw, 3.4rem);
+      line-height: 1.18;
+      margin: 0 0 20px;
+      font-weight: 500;
+      color: #26221d;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--terracotta);
+    }
+
+    .hero-sub {
+      font-size: 1.12rem;
+      line-height: 1.68;
+      color: var(--text-soft);
+      margin: 0 0 32px;
+      max-width: 530px;
+      font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+
+    .hero-trust-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-warm);
+    }
+
+    .hero-trust-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--text-soft);
+      font-weight: 500;
+    }
+
+    .hero-trust-item svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .hero-visual {
+      position: relative;
+    }
+
+    .hero-img-box {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(50, 42, 33, 0.08);
+      position: relative;
+      aspect-ratio: 4/4.8;
+      background: #EDE7DD;
+    }
+
+    .hero-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .hero-floating-card {
+      position: absolute;
+      bottom: -18px;
+      left: -18px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      padding: 16px 20px;
+      border-radius: var(--radius-md);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.07);
+      border: 1px solid var(--border-warm);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      max-width: 260px;
+    }
+
+    .hero-floating-card .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #EAF0E7;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .hero-floating-card p {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.35;
+      color: var(--text-soft);
+    }
+
+    .hero-floating-card strong {
+      display: block;
+      color: var(--text-main);
+      font-size: 0.88rem;
+      font-family: var(--font-serif);
+    }
+
+    /* Section Header */
+    .section-head {
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto 52px;
+    }
+
+    .section-subtitle {
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      color: var(--terracotta);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3vw, 2.3rem);
+      margin: 0 0 14px;
+      font-weight: 500;
+    }
+
+    .section-desc {
+      color: var(--text-soft);
+      font-size: 0.98rem;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* Categories Cards */
+    .categories-wrap {
+      padding: 80px 0;
+      background-color: #FAF7F2;
+    }
+
+    .category-card {
+      background: var(--surface-warm);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-warm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      box-shadow: 0 4px 16px rgba(45, 36, 26, 0.04);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .category-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 32px rgba(45, 36, 26, 0.09);
+    }
+
+    .category-img {
+      position: relative;
+      height: 250px;
+      overflow: hidden;
+      background: #EDE6DC;
+    }
+
+    .category-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .category-card:hover .category-img img {
+      transform: scale(1.05);
+    }
+
+    .category-badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(4px);
+      color: var(--text-main);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: 1px solid rgba(230, 222, 210, 0.7);
+    }
+
+    .category-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .category-body h3 {
+      font-size: 1.35rem;
+      margin: 0 0 10px;
+      font-weight: 500;
+    }
+
+    .category-body p {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      line-height: 1.6;
+      margin: 0 0 20px;
+      flex-grow: 1;
+    }
+
+    .fragrance-notes {
+      background: var(--surface-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .fragrance-notes span strong {
+      color: var(--text-main);
+    }
+
+    .category-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-warm);
+      padding-top: 16px;
+      margin-top: auto;
+    }
+
+    .category-footer .price-tag {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .category-footer .price-tag small {
+      font-size: 0.72rem;
+      font-family: var(--font-sans);
+      color: var(--text-soft);
+      font-weight: 400;
+      display: block;
+    }
+
+    /* Interactive Fragrance Finder Strip */
+    .finder-section {
+      padding: 60px 0;
+      background: #F3ECE2;
+      border-top: 1px solid var(--border-warm);
+      border-bottom: 1px solid var(--border-warm);
+    }
+
+    .finder-box {
+      background: #FFFFFF;
+      border-radius: var(--radius-lg);
+      padding: 36px 40px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+
+    .finder-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin: 18px 0;
+    }
+
+    .finder-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--border-warm);
+      background: #FAF7F2;
+      border-radius: 30px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .finder-btn.active, .finder-btn:hover {
+      background: var(--accent);
+      color: #FFFFFF;
+      border-color: var(--accent);
+    }
+
+    .recommendation-card {
+      background: #FAF7F2;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px dashed #D6CBBC;
+      position: relative;
+    }
+
+    .recommendation-card h4 {
+      margin: 0 0 6px;
+      font-size: 1.15rem;
+      color: var(--terracotta);
+    }
+
+    /* Why Prizela Section */
+    .why-section {
+      padding: 90px 0;
+      background: #FAF7F2;
+    }
+
+    .pillar-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-warm);
+      border-radius: var(--radius-md);
+      padding: 36px 28px;
+      text-align: center;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      height: 100%;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+    }
+
+    .pillar-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px rgba(45, 36, 26, 0.06);
+    }
+
+    .pillar-icon-wrap {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 22px;
+      border-radius: 50%;
+      background: #F3ECE2;
+      color: var(--terracotta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #E6DED2;
+    }
+
+    .pillar-icon-wrap svg {
+      width: 28px;
+      height: 28px;
+      stroke-width: 1.6;
+    }
+
+    .pillar-card h3 {
+      font-size: 1.28rem;
+      margin: 0 0 12px;
+      font-weight: 500;
+    }
+
+    .pillar-card p {
+      color: var(--text-soft);
+      font-size: 0.92rem;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* About Section */
+    .about-section {
+      padding: 85px 0;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border-warm);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 1.1fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .about-visual {
+      position: relative;
+    }
+
+    .about-img-main {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      aspect-ratio: 4/4.6;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+      background: #EDE6DC;
+    }
+
+    .about-img-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .about-seal {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      background: #FAF7F2;
+      border: 1px solid var(--border-warm);
+      border-radius: 50%;
+      width: 110px;
+      height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      padding: 10px;
+    }
+
+    .about-seal span {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--terracotta);
+      font-weight: 600;
+    }
+
+    .about-seal strong {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      color: var(--accent);
+      line-height: 1.1;
+      margin: 2px 0;
+    }
+
+    .about-content .section-subtitle {
+      text-align: left;
+    }
+
+    .about-content h2 {
+      font-size: clamp(2rem, 3.2vw, 2.6rem);
+      line-height: 1.25;
+      margin: 0 0 24px;
+      font-weight: 500;
+    }
+
+    .about-content p {
+      color: var(--text-soft);
+      font-size: 1rem;
+      line-height: 1.75;
+      margin-bottom: 20px;
+    }
+
+    .quote-box {
+      border-left: 3px solid var(--terracotta);
+      padding-left: 20px;
+      margin: 28px 0;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.08rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Testimonials Strip */
+    .reviews-section {
+      padding: 70px 0;
+      background: #FAF7F2;
+      border-top: 1px solid var(--border-warm);
+    }
+
+    .review-card {
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      padding: 24px;
+      border: 1px solid var(--border-warm);
+    }
+
+    .review-stars {
+      color: #C88D38;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+      letter-spacing: 2px;
+    }
+
+    .review-text {
+      font-size: 0.92rem;
+      font-style: italic;
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .review-author {
+      font-weight: 600;
+      font-size: 0.84rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .review-author span {
+      font-weight: 400;
+      color: #8c8277;
+      font-size: 0.78rem;
+    }
+
+    /* Final CTA Banner */
+    .cta-banner {
+      background: #4a5c43;
+      color: #FFFFFF;
+      padding: 64px 0;
+      text-align: center;
+      position: relative;
+    }
+
+    .cta-banner h2 {
+      color: #FFFFFF;
+      font-size: clamp(2rem, 3.4vw, 2.7rem);
+      margin: 0 0 16px;
+      font-weight: 500;
+    }
+
+    .cta-banner p {
+      color: #E2EADF;
+      font-size: 1.05rem;
+      max-width: 580px;
+      margin: 0 auto 32px;
+      line-height: 1.65;
+    }
+
+    .btn-cream {
+      background-color: #FAF7F2;
+      color: #2b2723;
+      padding: 13px 30px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-cream:hover {
+      background-color: #FFFFFF;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+      color: #2b2723;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: #25221E;
+      color: #D9D2C7;
+      padding: 64px 0 32px;
+      border-top: 1px solid #3d3731;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 48px;
+    }
+
+    .footer-brand .logo-title {
+      color: #FAF7F2;
+      font-family: var(--font-serif);
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+    }
+
+    .footer-brand .logo-sub {
+      color: #D19484;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    .footer-brand p {
+      color: #AFA69B;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      margin-top: 16px;
+      max-width: 320px;
+    }
+
+    .footer-heading {
+      color: #FAF7F2;
+      font-size: 0.94rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      font-family: var(--font-sans);
+    }
+
+    .footer-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer-list li, .footer-list a {
+      color: #AFA69B;
+      font-size: 0.88rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-list a:hover {
+      color: #FAF7F2;
+    }
+
+    .footer-location-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: #AFA69B;
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    .footer-location-item svg {
+      width: 18px;
+      height: 18px;
+      color: #D19484;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .social-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #332E29;
+      color: #FAF7F2;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 500;
+      border: 1px solid #48413A;
+      transition: all 0.2s;
+    }
+
+    .social-btn:hover {
+      background: #423B35;
+      color: #FAF7F2;
+      border-color: #5C534A;
+    }
+
+    .footer-bottom {
+      border-top: 1px solid #363029;
+      padding-top: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: #8C8276;
+    }
+
+    /* Floating WhatsApp Button */
+    .whatsapp-floating {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #25D366;
+      color: #FFFFFF;
+      padding: 12px 20px 12px 16px;
+      border-radius: 50px;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .whatsapp-floating:hover {
+      background-color: #20bd5a;
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 12px 28px rgba(37, 211, 102, 0.45);
+      color: #FFFFFF;
+    }
+
+    .whatsapp-floating svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+
+    .whatsapp-pulse {
+      position: absolute;
+      top: -2px;
+      right: -2px;
+      width: 12px;
+      height: 12px;
+      background: #FF5252;
+      border-radius: 50%;
+      border: 2px solid #FFFFFF;
+    }
+
+    /* Modal Checkout / Pedido Fácil */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      max-width: 460px;
+      width: 100%;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-soft);
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      color: var(--text-main);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      .hero-visual {
+        order: -1;
+        max-width: 480px;
+        margin: 0 auto;
+      }
+      .about-grid {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+      .finder-box {
+        grid-template-columns: 1fr;
+        padding: 24px;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-wrap {
+        padding: 40px 0;
+      }
+      .hero-floating-card {
+        bottom: -10px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+      }
+      .nav-links {
+        display: none;
+      }
+      .whatsapp-floating span {
+        display: none;
+      }
+      .whatsapp-floating {
+        padding: 14px;
+        border-radius: 50%;
+      }
+      .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+    }
+
+    @media print {
+      .site-nav, .announcement-bar, .whatsapp-floating, .cta-banner, .finder-section {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Announcement -->
+  <div class="announcement-bar">
+    Feito artesanalmente na Serra Gaúcha &bull; Nova Bassano, RS &bull; Enviamos com carinho para todo o Brasil
+  </div>
+
+  <!-- Main Navbar -->
+  <header class="site-nav">
+    <div class="shell-container nav-inner">
+      <a href="#" class="brand-logo" aria-label="Prizela Aromas Página Inicial">
+        <span class="logo-title">Prizela</span>
+        <span class="logo-sub">Aromas Artesanais</span>
+      </a>
+
+      <nav aria-label="Navegação principal">
+        <ul class="nav-links">
+          <li><a href="#colecao">Coleção</a></li>
+          <li><a href="#diferenciais">Por que Prizela?</a></li>
+          <li><a href="#sobre">Nossa História</a></li>
+          <li><a href="#depoimentos">Avaliações</a></li>
+        </ul>
+      </nav>
+
+      <div>
+        <a href="#colecao" class="btn-terracotta" style="padding: 9px 18px; font-size: 0.82rem;">
+          Explorar Catálogo
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- 1. HERO SECTION (AIDA: Atenção & Interesse) -->
+    <section class="hero-wrap" aria-labelledby="hero-title">
+      <div class="shell-container">
+        <div class="hero-grid">
+          
+          <div class="hero-content">
+            <span class="hero-badge-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+              </svg>
+              Cuidado em cada gota &bull; Serra Gaúcha
+            </span>
+
+            <h1 id="hero-title" class="hero-title">
+              Sinta o aconchego em <em>cada detalhe.</em>
+            </h1>
+
+            <p class="hero-sub">
+              Aromas artesanais criados para despertar sensações e transformar seus ambientes em experiências especiais.
+            </p>
+
+            <div class="hero-actions">
+              <!-- CTA Principal (Verde Oliva) -->
+              <a href="#colecao" class="btn-olive" id="hero-cta-btn">
+                <span>Quero perfumar minha casa</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </a>
+
+              <a href="#sobre" class="btn-outline-warm">
+                Conhecer a Prizela
+              </a>
+            </div>
+
+            <div class="hero-trust-list">
+              <div class="hero-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>100% Artesanal</span>
+              </div>
+              <div class="hero-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Cera vegetal & essências finas</span>
+              </div>
+              <div class="hero-trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                <span>Embalagens sustentáveis</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="hero-img-box">
+              <img 
+                src="https://img.usecurling.com/p/800/960?q=scented%20candle%20diffuser&color=yellow" 
+                alt="Ambiente acolhedor e minimalista decorado com difusores e velas da Prizela Aromas"
+                loading="eager"
+              >
+            </div>
+
+            <div class="hero-floating-card">
+              <div class="card-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+              </div>
+              <div>
+                <strong>Feito com Amor</strong>
+                <p>Produzido em pequenos lotes com todo carinho manual.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SEÇÃO DE CATEGORIAS (AIDA: Desejo) -->
+    <section id="colecao" class="categories-wrap" aria-labelledby="cat-title">
+      <div class="shell-container">
+        
+        <div class="section-head">
+          <span class="section-subtitle">Nossas Linhas Exclusivas</span>
+          <h2 id="cat-title" class="section-title">Encontre o formato perfeito para o seu lar</h2>
+          <p class="section-desc">
+            Cada item é desenvolvido com fórmulas exclusivas que perfumam suavemente sem sobrecarregar o olfato.
+          </p>
+        </div>
+
+        <div class="shell-grid" style="--grid-min: 300px; gap: 30px;">
+          
+          <!-- Card 1: Difusores de Varetas -->
+          <article class="category-card">
+            <div class="category-img">
+              <span class="category-badge">Mais Duradouro</span>
+              <img 
+                src="https://img.usecurling.com/p/600/500?q=reed%20diffuser%20glass&color=white" 
+                alt="Difusor de varetas em frasco de vidro elegante"
+                loading="lazy"
+              >
+            </div>
+            <div class="category-body">
+              <h3>Difusores de Varetas</h3>
+              <p>Perfume constante e sofisticação contínua. Varetas de fibra que distribuem a fragrância gradualmente em salas, halls e lavabos.</p>
+              
+              <div class="fragrance-notes">
+                <span><strong>Notas em destaque:</strong> Bamboo & Chá Branco</span>
+                <span><strong>Ideal para:</strong> Ambientes integrados e recepção</span>
+              </div>
+
+              <div class="category-footer">
+                <div class="price-tag">
+                  R$ 89,90
+                  <small>Frasco 250ml + 6 varetas</small>
+                </div>
+                <button class="btn-olive" onclick="openOrderModal('Difusor de Varetas', 'R$ 89,90')">
+                  Escolher
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 2: Home Sprays -->
+          <article class="category-card">
+            <div class="category-img">
+              <span class="category-badge">Efeito Imediato</span>
+              <img 
+                src="https://img.usecurling.com/p/600/500?q=room%20spray%20bottle&color=green" 
+                alt="Home Spray em frasco âmbar com borrifador"
+                loading="lazy"
+              >
+            </div>
+            <div class="category-body">
+              <h3>Home Sprays</h3>
+              <p>Praticidade e frescor imediato. Borrife no ar, almofadas, tapetes ou cortinas para renovar a energia do ambiente no instante desejado.</p>
+              
+              <div class="fragrance-notes">
+                <span><strong>Notas em destaque:</strong> Alecrim & Flor de Algodão</span>
+                <span><strong>Ideal para:</strong> Quarto, roupas de cama e relaxar</span>
+              </div>
+
+              <div class="category-footer">
+                <div class="price-tag">
+                  R$ 54,90
+                  <small>Frasco âmbar 200ml</small>
+                </div>
+                <button class="btn-olive" onclick="openOrderModal('Home Spray', 'R$ 54,90')">
+                  Escolher
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <!-- Card 3: Velas Aromáticas -->
+          <article class="category-card">
+            <div class="category-img">
+              <span class="category-badge">Ritual & Aconchego</span>
+              <img 
+                src="https://img.usecurling.com/p/600/500?q=scented%20candle%20cozy&color=yellow" 
+                alt="Vela aromática acesa com cera de coco e pavio de algodão"
+                loading="lazy"
+              >
+            </div>
+            <div class="category-body">
+              <h3>Velas Aromáticas</h3>
+              <p>Luz e perfume para seus rituais. Cera vegetal de coco, pavio 100% algodão e queima limpa que abraça a noite com calor e serenidade.</p>
+              
+              <div class="fragrance-notes">
+                <span><strong>Notas em destaque:</strong> Baunilha Real & Âmbar</span>
+                <span><strong>Ideal para:</strong> Leitura, banho de imersão e autocuidado</span>
+              </div>
+
+              <div class="category-footer">
+                <div class="price-tag">
+                  R$ 78,00
+                  <small>Pote de vidro 190g (~36h de queima)</small>
+                </div>
+                <button class="btn-olive" onclick="openOrderModal('Vela Aromática', 'R$ 78,00')">
+                  Escolher
+                </button>
+              </div>
+            </div>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- INTERACTIVE FRAGRANCE SELECTOR -->
+    <section class="finder-section">
+      <div class="shell-container">
+        <div class="finder-box">
+          <div>
+            <span class="section-subtitle">Guia Olfativo</span>
+            <h3 style="margin: 0 0 10px; font-size: 1.6rem;">Qual sensação você busca hoje?</h3>
+            <p style="color: var(--text-soft); font-size: 0.92rem; margin: 0 0 16px;">
+              Clique na energia que você deseja trazer para o seu espaço e receba a sugestão perfeita:
+            </p>
+            <div class="finder-tabs">
+              <button class="finder-btn active" onclick="selectMood('relax')">🧘 Tranquilidade & Sono</button>
+              <button class="finder-btn" onclick="selectMood('foco')">🌿 Frescor & Concentração</button>
+              <button class="finder-btn" onclick="selectMood('aconchego')">☕ Acolhimento & Afeto</button>
+              <button class="finder-btn" onclick="selectMood('receber')">✨ Elegância para Visitas</button>
+            </div>
+          </div>
+
+          <div class="recommendation-card" id="recommendation-box">
+            <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 600; color: #736b62; letter-spacing: 0.1em;">Recomendação Prizela</span>
+            <h4 id="rec-title">Lavanda Francesa & Camomila</h4>
+            <p id="rec-desc" style="color: var(--text-soft); font-size: 0.88rem; margin: 0 0 16px; line-height: 1.5;">
+              Combinação que acalma os pensamentos e desacelera o ritmo no fim do dia. Experimente acender a vela 30 minutos antes de dormir.
+            </p>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span id="rec-format" class="shell-badge" style="background:#E3ECE0; color:#3a4b35; font-size: 0.76rem;">Sugerido: Vela + Home Spray</span>
+              <button class="btn-terracotta" style="padding: 7px 14px; font-size: 0.78rem;" onclick="orderRecommendation()">
+                Quero essa combinação
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SEÇÃO 'POR QUE PRIZELA?' (AIDA: Convicção) -->
+    <section id="diferenciais" class="why-section" aria-labelledby="why-title">
+      <div class="shell-container">
+        
+        <div class="section-head">
+          <span class="section-subtitle">Nossos Pilares</span>
+          <h2 id="why-title" class="section-title">Por que escolher a Prizela?</h2>
+          <p class="section-desc">
+            Cada frasco carrega o compromisso de respeitar seu bem-estar, sua saúde e a harmonia da sua casa.
+          </p>
+        </div>
+
+        <div class="shell-grid" style="--grid-min: 280px; gap: 28px;">
+          
+          <!-- Pilar 1: Feito à Mão -->
+          <article class="pillar-card">
+            <div class="pillar-icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7v5l3 3"/>
+              </svg>
+            </div>
+            <h3>Feito à Mão</h3>
+            <p>
+              Produção artesanal em pequenas tiragens na Serra Gaúcha. Cada vela é vertida manualmente e cada difusor recebe tempo exato de maceração para liberar o aroma puro.
+            </p>
+          </article>
+
+          <!-- Pilar 2: Memórias Olfativas -->
+          <article class="pillar-card">
+            <div class="pillar-icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </div>
+            <h3>Memórias Olfativas</h3>
+            <p>
+              O olfato é o sentido mais ligado às emoções. Nossas pirâmides olfativas foram compostas para transformar seu lar no refúgio onde as melhores lembranças em família ganham vida.
+            </p>
+          </article>
+
+          <!-- Pilar 3: Presente Perfeito -->
+          <article class="pillar-card">
+            <div class="pillar-icon-wrap" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+            </div>
+            <h3>Presente Perfeito</h3>
+            <p>
+              Design minimalista atemporal que harmoniza com qualquer estilo de decoração. Acompanha fita de gorgurão, cartão afetivo e embalagem pronta para encantar quem recebe.
+            </p>
+          </article>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 4. SEÇÃO SOBRE (AIDA: Conexão Afetiva & História) -->
+    <section id="sobre" class="about-section" aria-labelledby="about-title">
+      <div class="shell-container">
+        <div class="about-grid">
+          
+          <div class="about-visual">
+            <div class="about-img-main">
+              <img 
+                src="https://img.usecurling.com/p/700/800?q=handmade%20candle%20craft&color=gray" 
+                alt="Processo artesanal de fabricação de velas e difusores na oficina da Prizela"
+                loading="lazy"
+              >
+            </div>
+            <div class="about-seal">
+              <span>Origem</span>
+              <strong>Nova Bassano</strong>
+              <span>RS</span>
+            </div>
+          </div>
+
+          <div class="about-content">
+            <span class="section-subtitle">Sobre a Prizela</span>
+            <h2 id="about-title">Detalhes que criam grandes memórias.</h2>
+            
+            <p>
+              A <strong>Prizela Aromas</strong> nasceu do desejo de desacelerar o compasso do dia a dia e resgatar o valor do momento presente. Entre os vales e a calmaria de Nova Bassano, no interior da Serra Gaúcha, encontramos na alquimia dos aromas a forma mais sincera de expressar hospitalidade.
+            </p>
+
+            <div class="quote-box">
+              "Acreditamos que uma casa perfumada não é apenas um luxo estético — é um abraço invisível que acolhe quem chega e acalma quem fica."
+            </div>
+
+            <p>
+              Por trás de cada frasco há rigor na seleção das matérias-primas: ceras veganas livres de parafina, essências nobres sem ftalatos e recipientes de vidro pensados para serem reutilizados na sua casa.
+            </p>
+
+            <div style="margin-top: 28px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+              <a href="https://www.instagram.com/prizela.aromas?lqvp=MXB6dTFvMmZnZnk2bQ==" target="_blank" rel="noopener noreferrer" class="btn-outline-warm" style="display: inline-flex; align-items: center; gap: 8px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                Conheça nossos bastidores no Instagram
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- DEPOIMENTOS / PROVA SOCIAL -->
+    <section id="depoimentos" class="reviews-section" aria-labelledby="reviews-title">
+      <div class="shell-container">
+        
+        <div class="section-head" style="margin-bottom: 40px;">
+          <span class="section-subtitle">Experiências Reais</span>
+          <h2 id="reviews-title" class="section-title">O que diz quem já perfuma a casa com a Prizela</h2>
+        </div>
+
+        <div class="shell-grid" style="--grid-min: 280px; gap: 24px;">
+          
+          <div class="review-card">
+            <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="review-text">"O difusor de Bamboo perfumou minha sala inteira sem enjoar. Todo mundo que entra aqui em casa pergunta qual é o perfume. O capricho da embalagem é emocionante."</p>
+            <div class="review-author">
+              Camila S. <span>&bull; Porto Alegre, RS</span>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="review-text">"A vela de Baunilha e Âmbar virou meu momento sagrado da noite de domingo. Queima limpa, perfume encorpado e o vidro é lindíssimo para decorar."</p>
+            <div class="review-author">
+              Mariana R. <span>&bull; Caxias do Sul, RS</span>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="review-text">"Comprei o Home Spray para presentear minha mãe e acabei tendo que pedir mais três para mim. Atendimento atencioso pelo WhatsApp e entrega rápida!"</p>
+            <div class="review-author">
+              Luciana P. <span>&bull; Passo Fundo, RS</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 5. BANNER FINAL (AIDA: Ação) -->
+    <section class="cta-banner">
+      <div class="shell-container">
+        <h2>Pronta para transformar a atmosfera do seu lar?</h2>
+        <p>
+          Fale com nossa equipe, tire dúvidas sobre as notas olfativas e monte seu kit personalizado de forma rápida e acolhedora.
+        </p>
+        <button class="btn-cream" onclick="openDirectWhatsapp('Gostaria de conhecer os kits da Prizela Aromas')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="#25D366">
+            <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
+          </svg>
+          Conversar pelo WhatsApp
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="shell-container">
+      <div class="footer-grid">
+        
+        <div class="footer-brand">
+          <div class="logo-title">Prizela</div>
+          <div class="logo-sub">Aromas Artesanais</div>
+          <p>
+            Velas, difusores e home sprays desenvolvidos com carinho, elegância e responsabilidade ambiental.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="footer-heading">Navegação Rápida</h3>
+          <ul class="footer-list">
+            <li><a href="#colecao">Difusores de Varetas</a></li>
+            <li><a href="#colecao">Home Sprays Refrescantes</a></li>
+            <li><a href="#colecao">Velas Aromáticas Vegetais</a></li>
+            <li><a href="#sobre">Nossa História & Valores</a></li>
+            <li><a href="#diferenciais">Por que a Prizela?</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="footer-heading">Ateliê & Contato</h3>
+          <ul class="footer-list">
+            <li class="footer-location-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>Nova Bassano &bull; RS<br>Serra Gaúcha &bull; Brasil</span>
+            </li>
+            <li style="margin-top: 10px;">
+              <a href="https://www.instagram.com/prizela.aromas?lqvp=MXB6dTFvMmZnZnk2bQ==" target="_blank" rel="noopener noreferrer" class="social-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+                @prizelaaromas
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; <span id="current-year"></span> Prizela Aromas. Todos os direitos reservados.
+        </div>
+        <div style="display: flex; gap: 20px;">
+          <span>Nova Bassano, RS</span>
+          <span>&bull;</span>
+          <span>Feito com aconchego</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BOTÃO FLUTUANTE DE WHATSAPP -->
+  <a 
+    href="https://wa.me/5554999091440?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20Prizela%20Aromas%20e%20gostaria%20de%20conhecer%20os%20produtos." 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    class="whatsapp-floating" 
+    id="floating-whatsapp"
+    aria-label="Fale conosco pelo WhatsApp"
+  >
+    <div class="whatsapp-pulse" aria-hidden="true"></div>
+    <svg viewBox="0 0 24 24">
+      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.19.53-1.09 1.04-1.5 1.07-.37.03-.84.05-2.73-.72-1.61-.65-2.64-2.29-2.72-2.4-.08-.11-.65-.87-.65-1.66 0-.79.41-1.18.56-1.34.15-.16.33-.2.44-.2.11 0 .22 0 .32.01.1.01.24-.04.38.29.14.33.48 1.17.52 1.26.04.09.07.2.01.32-.06.12-.09.2-.18.3-.09.11-.19.24-.27.32-.1.1-.2.2-.09.4.12.2.52.86 1.12 1.39.77.68 1.41.89 1.62.99.2.1.32.09.44-.05.12-.14.52-.61.66-.82.14-.21.28-.18.47-.11.19.07 1.2.57 1.41.67.2.1.34.16.39.25.05.1.05.57-.14 1.1"/>
+    </svg>
+    <span>Fale no WhatsApp</span>
+  </a>
+
+  <!-- MODAL DE PEDIDO DIRETO -->
+  <div class="modal-backdrop" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="modal-prod-name">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeOrderModal()" aria-label="Fechar">&times;</button>
+      
+      <span class="section-subtitle" style="text-align: left;">Pedido Facilitado</span>
+      <h3 id="modal-prod-name" style="margin: 0 0 8px; font-size: 1.35rem;">Nome do Produto</h3>
+      <p style="color: var(--text-soft); font-size: 0.88rem; margin: 0 0 20px;">
+        Valor estimado: <strong id="modal-prod-price" style="color: var(--text-main);">R$ 0,00</strong>.
+      </p>
+
+      <form id="orderForm" onsubmit="submitModalOrder(event)">
+        <div style="margin-bottom: 14px;">
+          <label for="userName" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-main);">
+            Seu Nome
+          </label>
+          <input 
+            type="text" 
+            id="userName" 
+            required 
+            placeholder="Ex: Maria Clara" 
+            style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-warm); border-radius: var(--radius-sm); font-size: 0.9rem;"
+          >
+        </div>
+
+        <div style="margin-bottom: 18px;">
+          <label for="fragranceChoice" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; color: var(--text-main);">
+            Aroma Preferido
+          </label>
+          <select 
+            id="fragranceChoice" 
+            style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid var(--border-warm); border-radius: var(--radius-sm); font-size: 0.9rem; background: #fff;"
+          >
+            <option value="Bamboo & Chá Branco">Bamboo & Chá Branco (Fresco e elegante)</option>
+            <option value="Alecrim & Flor de Algodão">Alecrim & Flor de Algodão (Herbal e reconfortante)</option>
+            <option value="Baunilha Real & Âmbar">Baunilha Real & Âmbar (Doce e aconchegante)</option>
+            <option value="Lavanda Francesa">Lavanda Francesa (Relaxante e sereno)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-olive" style="width: 100%; justify-content: center;">
+          Concluir Pedido no WhatsApp
+        </button>
+        <p style="text-align: center; font-size: 0.75rem; color: #887f73; margin: 12px 0 0;">
+          Você será direcionada ao WhatsApp oficial da Prizela Aromas para combinar entrega e pagamento seguro.
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Atualização de ano no rodapé
+    document.getElementById('current-year').textContent = new Date().getFullYear();
+
+    // Dados do Guia Olfativo
+    const moods = {
+      relax: {
+        title: "Lavanda Francesa & Flor de Algodão",
+        desc: "Combinação botânica suave que desacelera a mente, purifica os sentimentos e prepara o quarto para noites serenas.",
+        format: "Sugerido: Vela Vegetal + Home Spray Lençóis"
+      },
+      foco: {
+        title: "Alecrim & Sálvia da Serra",
+        desc: "Notas verdes e revigorantes que estimulam a presença, clareiam a concentração em home office e trazem vitalidade.",
+        format: "Sugerido: Home Spray de Ambientes"
+      },
+      aconchego: {
+        title: "Baunilha Real, Canela Suave & Âmbar",
+        desc: "Um abraço quente em dias amenos. Desperta lembranças de café da tarde, bolo assado e conforto acolhedor em família.",
+        format: "Sugerido: Vela Aromática no Vidro Âmbar"
+      },
+      receber: {
+        title: "Bamboo Nobre & Chá Branco",
+        desc: "Fragrância sofisticada de alta fixação que imprime elegância no hall de entrada, living e lavabos para recepcionar amigos.",
+        format: "Sugerido: Difusor de Varetas 250ml"
+      }
+    };
+
+    function selectMood(key) {
+      // Atualiza botões
+      const buttons = document.querySelectorAll('.finder-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+
+      const data = moods[key];
+      const recTitle = document.getElementById('rec-title');
+      const recDesc = document.getElementById('rec-desc');
+      const recFormat = document.getElementById('rec-format');
+
+      if (data) {
+        recTitle.textContent = data.title;
+        recDesc.textContent = data.desc;
+        recFormat.textContent = data.format;
+      }
+    }
+
+    function orderRecommendation() {
+      const aroma = document.getElementById('rec-title').textContent;
+      const format = document.getElementById('rec-format').textContent;
+      const text = encodeURIComponent(`Olá Prizela Aromas! Fiquei encantada com a recomendação do Guia Olfativo: "${aroma}" (${format}). Gostaria de encomendar!`);
+      window.open(`https://wa.me/5554999091440?text=${text}`, '_blank');
+    }
+
+    // Modal de Pedido
+    let currentProduct = '';
+    let currentPrice = '';
+
+    function openOrderModal(prodName, price) {
+      currentProduct = prodName;
+      currentPrice = price;
+      document.getElementById('modal-prod-name').textContent = prodName;
+      document.getElementById('modal-prod-price').textContent = price;
+      document.getElementById('orderModal').classList.add('open');
+      document.getElementById('userName').focus();
+    }
+
+    function closeOrderModal() {
+      document.getElementById('orderModal').classList.remove('open');
+    }
+
+    function submitModalOrder(e) {
+      e.preventDefault();
+      const name = document.getElementById('userName').value.trim();
+      const aroma = document.getElementById('fragranceChoice').value;
+      const message = `Olá, meu nome é ${name}! Gostaria de encomendar o item da Prizela Aromas:
+- Produto: ${currentProduct} (${currentPrice})
+- Aroma escolhido: ${aroma}
+Poderiam me informar sobre prazos para entrega em Nova Bassano ou envio?`;
+
+      closeOrderModal();
+      window.open(`https://wa.me/5554999091440?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    function openDirectWhatsapp(customMsg) {
+      const msg = encodeURIComponent(customMsg || "Olá! Gostaria de mais informações sobre os aromas artesanais da Prizela.");
+      window.open(`https://wa.me/5554999091440?text=${msg}`, '_blank');
+    }
+
+    // Fechar modal ao clicar fora
+    window.addEventListener('click', function(e) {
+      const modal = document.getElementById('orderModal');
+      if (e.target === modal) {
+        closeOrderModal();
+      }
+    });
+
+    // Tecla ESC fecha modal
+    window.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeOrderModal();
+      }
+    });
+  </script>
+<script>
+/* Skip artifact shell — fixed helpers served beside every artifact. */
+(function () {
+  "use strict";
+
+  var fmt = {
+    num: function (v, opts) { return new Intl.NumberFormat("pt-BR", opts || {}).format(v); },
+    brl: function (v) { return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v); },
+    pct: function (v) { return new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(v); }
+  };
+
+  // axisFmt keeps axis tick labels short (compact notation) so long values
+  // (e.g. full BRL amounts) never clip against the plot edge.
+  function axisFmt(v) {
+    return fmt.num(v, { notation: "compact", maximumFractionDigits: 1 });
+  }
+
+  // format accepts a function OR one of the fmt names ("num" | "brl" | "pct").
+  function coerceFormat(spec) {
+    if (typeof spec === "function") return spec;
+    if (typeof spec === "string" && fmt[spec]) return fmt[spec];
+    return function (v) { return fmt.num(v); };
+  }
+
+  function accent() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
+  }
+  function mutedColor() {
+    return getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim() || "#5b6472";
+  }
+  function svgEl(tag, attrs) {
+    var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+  function frame(el, w, h) {
+    var svg = svgEl("svg", { viewBox: "0 0 " + w + " " + h, role: "img" });
+    el.innerHTML = "";
+    el.appendChild(svg);
+    return svg;
+  }
+
+  // maxOf guards the axis scale: empty values would give -Infinity (truthy,
+  // so "|| 1" can't catch it) and a non-positive max would flip the chart.
+  function maxOf(values) {
+    var m = values.length ? Math.max.apply(null, values) : 0;
+    return m > 0 ? m : 1;
+  }
+
+  // bar(el, {labels:[], values:[], color?, format?}) — vertical bar chart.
+  function bar(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 12, plotH = H - padT - padB;
+    var step = plotW / n, bw = Math.min(step * 0.62, 64);
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 12, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    cfg.values.forEach(function (v, i) {
+      var bh = Math.max(0, (v / max) * plotH);
+      var x = padL + i * step + (step - bw) / 2;
+      var y = padT + plotH - bh;
+      var r = svgEl("rect", { x: x, y: y, width: bw, height: bh, rx: 4, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(v);
+      r.appendChild(t);
+      svg.appendChild(r);
+      var tx = svgEl("text", { x: x + bw / 2, y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // line(el, {labels:[], values:[], color?, format?}) — single-series line.
+  function line(el, cfg) {
+    var W = 640, H = 280, padL = 46, padB = 30, padT = 12;
+    var svg = frame(el, W, H);
+    var max = maxOf(cfg.values);
+    var n = cfg.values.length;
+    var plotW = W - padL - 16, plotH = H - padT - padB;
+    var color = cfg.color || accent();
+    var f = coerceFormat(cfg.format);
+    for (var g = 0; g <= 4; g++) {
+      var gy = padT + plotH - (plotH * g) / 4;
+      svg.appendChild(svgEl("line", { x1: padL, y1: gy, x2: W - 16, y2: gy, stroke: "currentColor", "stroke-opacity": 0.08 }));
+      var lbl = svgEl("text", { x: padL - 8, y: gy + 4, "text-anchor": "end", "font-size": 10, fill: mutedColor() });
+      lbl.textContent = axisFmt((max * g) / 4);
+      svg.appendChild(lbl);
+    }
+    var pts = cfg.values.map(function (v, i) {
+      var x = padL + (n === 1 ? plotW / 2 : (plotW * i) / (n - 1));
+      var y = padT + plotH - (v / max) * plotH;
+      return [x, y];
+    });
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    svg.appendChild(svgEl("path", { d: d, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+    pts.forEach(function (p, i) {
+      var c = svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: color });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + f(cfg.values[i]);
+      c.appendChild(t);
+      svg.appendChild(c);
+      var tx = svgEl("text", { x: p[0], y: H - 10, "text-anchor": "middle", "font-size": 11, fill: mutedColor() });
+      tx.textContent = cfg.labels[i];
+      svg.appendChild(tx);
+    });
+  }
+
+  // donut(el, {labels:[], values:[], colors?}) — donut with center total.
+  function donut(el, cfg) {
+    var W = 320, H = 280, cx = W / 2, cy = H / 2, R = 92, r = 58;
+    var svg = frame(el, W, H);
+    var total = cfg.values.reduce(function (a, b) { return a + b; }, 0) || 1;
+    var palette = cfg.colors || [accent(), "#1baf7a", "#eda100", "#e34948", "#4a3aa7", "#e87ba4"];
+    var a0 = -Math.PI / 2;
+    cfg.values.forEach(function (v, i) {
+      var a1 = a0 + (v / total) * Math.PI * 2;
+      var large = a1 - a0 > Math.PI ? 1 : 0;
+      var p = ["M", cx + R * Math.cos(a0), cy + R * Math.sin(a0),
+        "A", R, R, 0, large, 1, cx + R * Math.cos(a1), cy + R * Math.sin(a1),
+        "L", cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+        "A", r, r, 0, large, 0, cx + r * Math.cos(a0), cy + r * Math.sin(a0), "Z"].join(" ");
+      var path = svgEl("path", { d: p, fill: palette[i % palette.length] });
+      var t = svgEl("title", {});
+      t.textContent = cfg.labels[i] + ": " + fmt.num(v) + " (" + fmt.pct(v / total) + ")";
+      path.appendChild(t);
+      svg.appendChild(path);
+      a0 = a1;
+    });
+    var center = svgEl("text", { x: cx, y: cy + 5, "text-anchor": "middle", "font-size": 20, "font-weight": 650, fill: "currentColor" });
+    center.textContent = fmt.num(total);
+    svg.appendChild(center);
+  }
+
+  window.skipShell = { fmt: fmt };
+  window.skipChart = { bar: bar, line: line, donut: donut };
+})();
+
+</script>
+</body>
+</html>
